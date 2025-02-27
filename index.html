@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forca Enumerada - Dia da Matemática</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #ffcc00;
+        }
+
+        h1 {
+            color: #ff6600;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-container {
+            margin-top: 30px;
+        }
+
+        #word {
+            font-size: 30px;
+            letter-spacing: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .hangman {
+            font-size: 50px;
+            color: #ff6600;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            font-size: 18px;
+            padding: 5px;
+            width: 50px;
+            text-align: center;
+            border-radius: 5px;
+            border: 1px solid #ff6600;
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #ff6600;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff3300;
+        }
+
+        #score {
+            font-size: 24px;
+            color: #ff3300;
+            font-weight: bold;
+        }
+
+        #game-over {
+            display: none;
+            font-size: 24px;
+            color: red;
+        }
+
+        #restart {
+            font-size: 18px;
+            color: #ff6600;
+            background-color: white;
+            border: 2px solid #ff6600;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #restart:hover {
+            background-color: #ff6600;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Forca Enumerada - Comemore o Dia da Matemática!</h1>
+    <p id="score">Pontuação: 0</p>
+
+    <div class="game-container">
+        <p id="word">_ _ _ _ _</p>
+        <p class="hangman">Tentativas restantes: <span id="remaining-tries">6</span></p>
+        <p id="question">Dica: Um conceito matemático</p>
+        <div class="controls">
+            <input type="text" id="guess" maxlength="1">
+            <button onclick="guessLetter()">Adivinhar Letra</button>
+        </div>
+        <div id="game-over"></div>
+        <button id="restart" onclick="restartGame()" style="display: none;">Reiniciar Jogo</button>
+    </div>
+
+    <script>
+        // Palavras ou frases matemáticas para o jogo
+        const words = [
+            { word: "soma", hint: "Operação matemática básica" },
+            { word: "subtracao", hint: "Operação matemática básica" },
+            { word: "multiplicacao", hint: "Operação matemática básica" },
+            { word: "divisao", hint: "Operação matemática básica" },
+            { word: "numero", hint: "Unidade matemática" },
+            { word: "adicao", hint: "Outro nome para soma" },
+            { word: "fatorial", hint: "Produto de números consecutivos" },
+            { word: "potencia", hint: "Multiplicação repetida" },
+        ];
+
+        let wordToGuess = {};
+        let guessedWord = [];
+        let remainingTries = 6;
+        let score = 0;
+        let usedLetters = [];
+
+        function startGame() {
+            wordToGuess = words[Math.floor(Math.random() * words.length)];
+            guessedWord = Array(wordToGuess.word.length).fill('_');
+            remainingTries = 6;
+            usedLetters = [];
+            document.getElementById("word").innerText = guessedWord.join(" ");
+            document.getElementById("remaining-tries").innerText = remainingTries;
+            document.getElementById("question").innerText = `Dica: ${wordToGuess.hint}`;
+            document.getElementById("game-over").style.display = "none";
+            document.getElementById("restart").style.display = "none";
+            document.getElementById("guess").value = "";
+            document.getElementById("guess").focus();
+        }
+
+        function guessLetter() {
+            let guess = document.getElementById("guess").value.toLowerCase();
+            if (guess && !usedLetters.includes(guess)) {
+                usedLetters.push(guess);
+
+                if (wordToGuess.word.includes(guess)) {
+                    // Atualiza a palavra
+                    for (let i = 0; i < wordToGuess.word.length; i++) {
+                        if (wordToGuess.word[i] === guess) {
+                            guessedWord[i] = guess;
+                        }
+                    }
+
+                    document.getElementById("word").innerText = guessedWord.join(" ");
+                    score += 10;
+                    document.getElementById("score").innerText = `Pontuação: ${score}`;
+                } else {
+                    remainingTries--;
+                    document.getElementById("remaining-tries").innerText = remainingTries;
+                }
+
+                // Verifica se o jogador venceu ou perdeu
+                if (guessedWord.join("") === wordToGuess.word) {
+                    setTimeout(() => alert("Você venceu!"), 200);
+                    document.getElementById("game-over").innerText = "Você venceu!";
+                    document.getElementById("game-over").style.display = "block";
+                    document.getElementById("restart").style.display = "inline-block";
+                }
+
+                if (remainingTries === 0) {
+                    setTimeout(() => alert("Você perdeu!"), 200);
+                    document.getElementById("game-over").innerText = `Você perdeu! A palavra era: ${wordToGuess.word}`;
+                    document.getElementById("game-over").style.display = "block";
+                    document.getElementById("restart").style.display = "inline-block";
+                }
+            } else {
+                alert("Você já tentou essa letra ou a entrada é inválida!");
+            }
+
+            document.getElementById("guess").value = "";
+            document.getElementById("guess").focus();
+        }
+
+        function restartGame() {
+            score = 0;
+            document.getElementById("score").innerText = `Pontuação: ${score}`;
+            startGame();
+        }
+
+        // Inicia o jogo ao carregar a página
+        window.onload = startGame;
+    </script>
+</body>
+</html>
